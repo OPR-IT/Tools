@@ -1,1 +1,1 @@
-This is the space to share *non-secure* scripts and utilities for increased productivity at OPR.
+This is the space to share *safe/non-sensitive* scripts and utilities for increased productivity at OPR.
