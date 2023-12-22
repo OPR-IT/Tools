@@ -3,17 +3,11 @@
 # Derive variables from the URL
 read -p "Enter the website URL (e.g., http://yourdomain.com): " WP_URL
 DOMAIN_NAME=$(echo "$WP_URL" | awk -F[/:] '{print $4}')
-SUB_DIR="${DOMAIN_NAME//./_}" # Use the domain name without dots as the subdirectory name
+SUB_DIR="${DOMAIN_NAME//./_}"_$(date +%s) # Use the domain name with a timestamp as the subdirectory name
 WP_DIR="/var/www/$SUB_DIR"
 DB_NAME="${SUB_DIR}_db"
 DB_USER="${SUB_DIR}_user"
 DB_PASSWORD=$(openssl rand -base64 12) # Generating a random password
-
-# Remove directory if it exists
-if [ -d "$WP_DIR" ]; then
-    echo "Removing existing directory: $WP_DIR"
-    sudo rm -rf "$WP_DIR"
-fi
 
 # Create WordPress installation directory
 mkdir -p $WP_DIR
