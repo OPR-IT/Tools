@@ -9,10 +9,10 @@ DB_NAME="${SUB_DIR}_db"
 DB_USER="${SUB_DIR}_user"
 DB_PASSWORD=$(openssl rand -base64 12) # Generating a random password
 
-# Check if the directory already exists
+# Remove directory if it exists
 if [ -d "$WP_DIR" ]; then
-    echo "Directory $WP_DIR already exists. Please choose a different domain or remove the existing directory."
-    exit 1
+    echo "Removing existing directory: $WP_DIR"
+    sudo rm -rf "$WP_DIR"
 fi
 
 # Create WordPress installation directory
