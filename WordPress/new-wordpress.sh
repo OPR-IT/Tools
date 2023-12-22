@@ -22,22 +22,20 @@ sudo -u $SUDO_USER wget https://wordpress.org/latest.tar.gz
 sudo -u $SUDO_USER tar -xzvf latest.tar.gz
 sudo -u $SUDO_USER rm latest.tar.gz
 
+# Move WordPress files to the correct directory
+mv wordpress/* $WP_DIR
+rmdir wordpress
+
 # Create the WordPress configuration file
-cd wordpress || exit
-sudo -u $SUDO_USER cp wp-config-sample.php wp-config.php
-sudo -u $SUDO_USER sed -i "s/database_name_here/$DB_NAME/" wp-config.php
-sudo -u $SUDO_USER sed -i "s/username_here/$DB_USER/" wp-config.php
+sudo -u $SUDO_USER cp $WP_DIR/wp-config-sample.php $WP_DIR/wp-config.php
+sudo -u $SUDO_USER sed -i "s/database_name_here/$DB_NAME/" $WP_DIR/wp-config.php
+sudo -u $SUDO_USER sed -i "s/username_here/$DB_USER/" $WP_DIR/wp-config.php
 
 # Set up the database
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"
 mysql -u root -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY ''"
 mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost'"
 mysql -u root -e "FLUSH PRIVILEGES"
-
-# Set up WordPress site
-sudo -u $SUDO_USER mv * ../
-cd ..
-rmdir wordpress
 
 # Set proper permissions
 chown -R www-data:www-data $WP_DIR
@@ -86,4 +84,4 @@ a2ensite $DOMAIN_NAME.conf
 a2enmod ssl
 systemctl restart apache2
 
-echo "WordPress installed successfully with derived variables, existing directories forcefully removed, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
+echo "WordPress installed successfully in the designated directory, Apache virtual host configured, Certbot-generated SSL enabled, and HTTP to HTTPS redirection set up!"
