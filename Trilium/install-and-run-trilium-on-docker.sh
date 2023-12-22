@@ -13,4 +13,4 @@ else
 	$_2="$2"
 fi
 sudo docker pull zadam/trilium && \
-sudo docker run --rm -dtip 0.0.0.0:$_1:$_1 -v ~/"$_2":/home/node/trilium-data zadam/trilium
+sudo docker run --rm -dtip 0.0.0.0:"$_1":"$_1" -v ~/"$_2":/home/node/trilium-data zadam/trilium
