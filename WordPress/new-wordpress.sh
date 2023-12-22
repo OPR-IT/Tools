@@ -6,10 +6,12 @@ DOMAIN_NAME=$(echo "$WP_URL" | awk -F[/:] '{print $4}')
 WP_DIR="/var/www/html/$DOMAIN_NAME"
 DB_NAME="${DOMAIN_NAME//./_}_db"
 DB_USER="${DOMAIN_NAME//./_}_user"
+DB_PASSWORD=$(openssl rand -base64 12) # Generating a random password
 
-# Remove existing directory, if it exists
+# Check if the directory already exists
 if [ -d "$WP_DIR" ]; then
-    sudo rm -rf "$WP_DIR"
+    echo "Directory $WP_DIR already exists. Please choose a different domain or remove the existing directory."
+    exit 1
 fi
 
 # Create WordPress installation directory
@@ -30,20 +32,21 @@ rmdir wordpress
 sudo -u $SUDO_USER cp $WP_DIR/wp-config-sample.php $WP_DIR/wp-config.php
 sudo -u $SUDO_USER sed -i "s/database_name_here/$DB_NAME/" $WP_DIR/wp-config.php
 sudo -u $SUDO_USER sed -i "s/username_here/$DB_USER/" $WP_DIR/wp-config.php
+sudo -u $SUDO_USER sed -i "s/password_here/$DB_PASSWORD/" $WP_DIR/wp-config.php
 
 # Set up the database
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"
-mysql -u root -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY ''"
-mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost'"
-mysql -u root -e "FLUSH PRIVILEGES"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+mysql -u root -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+mysql -u root -e "FLUSH PRIVILEGES;"
 
 # Set proper permissions
 chown -R www-data:www-data $WP_DIR
 chmod -R 755 $WP_DIR
 
 # Update site URL in WordPress database
-mysql -u $DB_USER -e "UPDATE ${DB_NAME}.wp_options SET option_value='$WP_URL' WHERE option_name='siteurl'"
-mysql -u $DB_USER -e "UPDATE ${DB_NAME}.wp_options SET option_value='$WP_URL' WHERE option_name='home'"
+mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' WHERE option_name='siteurl';"
+mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' WHERE option_name='home';"
 
 # Generate CSR with Certbot
 certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
@@ -84,4 +87,12 @@ a2ensite $DOMAIN_NAME.conf
 a2enmod ssl
 systemctl restart apache2
 
-echo "WordPress installed successfully in the designated directory, Apache virtual host configured, Certbot-generated SSL enabled, and HTTP to HTTPS redirection set up!"
+# Clean up WordPress temporary files
+sudo rm -rf /var/www/html/latest.tar.gz
+
+# Print installation summary
+echo "WordPress installed successfully in a new directory: $WP_DIR"
+echo "Database Name: $DB_NAME"
+echo "Database User: $DB_USER"
+echo "Database Password: $DB_PASSWORD"
+echo "Website URL: $WP_URL"
