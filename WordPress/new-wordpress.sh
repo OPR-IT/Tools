@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Derive variables from the URL
-read -p "Enter the website URL (e.g., http://yourdomain.com): " WP_URL
-DOMAIN_NAME=$(echo "$WP_URL" | awk -F[/:] '{print $4}')
+read -p "Enter the website URL (e.g., yourdomain.com): " DOMAIN_NAME
+WP_URL="http://$DOMAIN_NAME"
 SUB_DIR="${DOMAIN_NAME//./_}"_$(date +%s) # Use the domain name with a timestamp as the subdirectory name
 WP_DIR="/var/www/$SUB_DIR"
 DB_NAME="${SUB_DIR}_db"
