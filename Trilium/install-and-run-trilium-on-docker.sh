@@ -1,14 +1,13 @@
-#!/bin/bash
 if [ -z $1 ]; then
-	$_1='8080'
+	$_1="8080"
 else
 	$_1="$1"
 fi
 if [ -z $2 ]; then
 	if [ -d 'trilium-data' ]; then
-		$_2='trilium-data1'
+		$_2="trilium-data1"
 	else
-		$_2='trilium-data'
+		$_2="trilium-data"
 	fi
 else
 	$_2="$2"
