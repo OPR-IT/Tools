@@ -3,9 +3,10 @@
 # Derive variables from the URL
 read -p "Enter the website URL (e.g., http://yourdomain.com): " WP_URL
 DOMAIN_NAME=$(echo "$WP_URL" | awk -F[/:] '{print $4}')
-WP_DIR="/var/www/html/$DOMAIN_NAME"
-DB_NAME="${DOMAIN_NAME//./_}_db"
-DB_USER="${DOMAIN_NAME//./_}_user"
+SUB_DIR="${DOMAIN_NAME//./_}" # Use the domain name without dots as the subdirectory name
+WP_DIR="/var/www/$SUB_DIR"
+DB_NAME="${SUB_DIR}_db"
+DB_USER="${SUB_DIR}_user"
 DB_PASSWORD=$(openssl rand -base64 12) # Generating a random password
 
 # Check if the directory already exists
@@ -52,7 +53,7 @@ mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_
 certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
 
 # Create Apache Virtual Host Configuration File
-tee /etc/apache2/sites-available/$DOMAIN_NAME.conf > /dev/null << EOF
+tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 <VirtualHost *:80>
     ServerAdmin webmaster@$DOMAIN_NAME
     ServerName $DOMAIN_NAME
@@ -83,15 +84,15 @@ tee /etc/apache2/sites-available/$DOMAIN_NAME.conf > /dev/null << EOF
 EOF
 
 # Enable Apache Virtual Host and SSL
-a2ensite $DOMAIN_NAME.conf
+a2ensite $SUB_DIR.conf
 a2enmod ssl
 systemctl restart apache2
 
 # Clean up WordPress temporary files
-sudo rm -rf /var/www/html/latest.tar.gz
+sudo rm -rf /var/www/latest.tar.gz
 
 # Print installation summary
-echo "WordPress installed successfully in a new directory: $WP_DIR"
+echo "WordPress installed successfully in a new subdirectory: $WP_DIR"
 echo "Database Name: $DB_NAME"
 echo "Database User: $DB_USER"
 echo "Database Password: $DB_PASSWORD"
