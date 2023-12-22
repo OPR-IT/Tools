@@ -15,7 +15,7 @@ fi
 # Create WordPress installation directory
 mkdir -p $WP_DIR
 chown -R $SUDO_USER:$SUDO_USER $WP_DIR
-cd $WP_DIR
+cd $WP_DIR || exit
 
 # Download WordPress
 sudo -u $SUDO_USER wget https://wordpress.org/latest.tar.gz
@@ -23,7 +23,7 @@ sudo -u $SUDO_USER tar -xzvf latest.tar.gz
 sudo -u $SUDO_USER rm latest.tar.gz
 
 # Create the WordPress configuration file
-cd wordpress
+cd wordpress || exit
 sudo -u $SUDO_USER cp wp-config-sample.php wp-config.php
 sudo -u $SUDO_USER sed -i "s/database_name_here/$DB_NAME/" wp-config.php
 sudo -u $SUDO_USER sed -i "s/username_here/$DB_USER/" wp-config.php
@@ -86,4 +86,4 @@ a2ensite $DOMAIN_NAME.conf
 a2enmod ssl
 systemctl restart apache2
 
-echo "WordPress installed successfully with derived variables, existing directories removed, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
+echo "WordPress installed successfully with derived variables, existing directories forcefully removed, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
