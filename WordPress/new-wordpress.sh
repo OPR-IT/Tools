@@ -1,56 +1,57 @@
 #!/bin/bash
 
-# Get user input for the URL
-read -p "Enter the website URL (e.g., http://yourdomain.com): " WP_URL
-
 # Derive variables from the URL
+read -p "Enter the website URL (e.g., http://yourdomain.com): " WP_URL
 DOMAIN_NAME=$(echo "$WP_URL" | awk -F[/:] '{print $4}')
 WP_DIR="/var/www/html/$DOMAIN_NAME"
 DB_NAME="${DOMAIN_NAME//./_}_db"
 DB_USER="${DOMAIN_NAME//./_}_user"
-DB_PASSWORD=$(openssl rand -base64 12)
+
+# Remove existing directory, if it exists
+if [ -d "$WP_DIR" ]; then
+    sudo rm -rf "$WP_DIR"
+fi
 
 # Create WordPress installation directory
-sudo mkdir -p $WP_DIR
-sudo chown -R $USER:$USER $WP_DIR
+mkdir -p $WP_DIR
+chown -R $SUDO_USER:$SUDO_USER $WP_DIR
 cd $WP_DIR
 
 # Download WordPress
-wget https://wordpress.org/latest.tar.gz
-tar -xzvf latest.tar.gz
-rm latest.tar.gz
+sudo -u $SUDO_USER wget https://wordpress.org/latest.tar.gz
+sudo -u $SUDO_USER tar -xzvf latest.tar.gz
+sudo -u $SUDO_USER rm latest.tar.gz
 
 # Create the WordPress configuration file
 cd wordpress
-cp wp-config-sample.php wp-config.php
-sed -i "s/database_name_here/$DB_NAME/" wp-config.php
-sed -i "s/username_here/$DB_USER/" wp-config.php
-sed -i "s/password_here/$DB_PASSWORD/" wp-config.php
+sudo -u $SUDO_USER cp wp-config-sample.php wp-config.php
+sudo -u $SUDO_USER sed -i "s/database_name_here/$DB_NAME/" wp-config.php
+sudo -u $SUDO_USER sed -i "s/username_here/$DB_USER/" wp-config.php
 
 # Set up the database
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"
-mysql -u root -p -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD'"
-mysql -u root -p -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost'"
-mysql -u root -p -e "FLUSH PRIVILEGES"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"
+mysql -u root -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY ''"
+mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost'"
+mysql -u root -e "FLUSH PRIVILEGES"
 
 # Set up WordPress site
-mv * ../
+sudo -u $SUDO_USER mv * ../
 cd ..
 rmdir wordpress
 
 # Set proper permissions
-sudo chown -R www-data:www-data $WP_DIR
-sudo chmod -R 755 $WP_DIR
+chown -R www-data:www-data $WP_DIR
+chmod -R 755 $WP_DIR
 
 # Update site URL in WordPress database
-mysql -u $DB_USER -p $DB_NAME -e "UPDATE wp_options SET option_value='$WP_URL' WHERE option_name='siteurl'"
-mysql -u $DB_USER -p $DB_NAME -e "UPDATE wp_options SET option_value='$WP_URL' WHERE option_name='home'"
+mysql -u $DB_USER -e "UPDATE ${DB_NAME}.wp_options SET option_value='$WP_URL' WHERE option_name='siteurl'"
+mysql -u $DB_USER -e "UPDATE ${DB_NAME}.wp_options SET option_value='$WP_URL' WHERE option_name='home'"
 
 # Generate CSR with Certbot
-sudo certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
+certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
 
 # Create Apache Virtual Host Configuration File
-sudo tee /etc/apache2/sites-available/$DOMAIN_NAME.conf > /dev/null << EOF
+tee /etc/apache2/sites-available/$DOMAIN_NAME.conf > /dev/null << EOF
 <VirtualHost *:80>
     ServerAdmin webmaster@$DOMAIN_NAME
     ServerName $DOMAIN_NAME
@@ -81,8 +82,8 @@ sudo tee /etc/apache2/sites-available/$DOMAIN_NAME.conf > /dev/null << EOF
 EOF
 
 # Enable Apache Virtual Host and SSL
-sudo a2ensite $DOMAIN_NAME.conf
-sudo a2enmod ssl
-sudo systemctl restart apache2
+a2ensite $DOMAIN_NAME.conf
+a2enmod ssl
+systemctl restart apache2
 
-echo "WordPress installed successfully with derived variables, directories created, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
+echo "WordPress installed successfully with derived variables, existing directories removed, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
