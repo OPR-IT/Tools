@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# Get user input for variables
-read -p "Enter the WordPress installation directory (e.g., /var/www/html): " WP_DIR
-read -p "Enter the desired domain name for the WordPress site (e.g., example.com): " DOMAIN_NAME
-read -p "Enter the desired database name for WordPress: " DB_NAME
-read -p "Enter the desired database username for WordPress: " DB_USER
-read -s -p "Enter the password for the database user: " DB_PASSWORD
-echo ""
-read -p "Enter your website URL (e.g., http://yourdomain.com): " WP_URL
+# Get user input for the URL
+read -p "Enter the website URL (e.g., http://yourdomain.com): " WP_URL
+
+# Derive variables from the URL
+DOMAIN_NAME=$(echo "$WP_URL" | awk -F[/:] '{print $4}')
+WP_DIR="/var/www/html/$DOMAIN_NAME"
+DB_NAME="${DOMAIN_NAME//./_}_db"
+DB_USER="${DOMAIN_NAME//./_}_user"
+DB_PASSWORD=$(openssl rand -base64 12)
 
 # Create WordPress installation directory
 sudo mkdir -p $WP_DIR
@@ -84,4 +85,4 @@ sudo a2ensite $DOMAIN_NAME.conf
 sudo a2enmod ssl
 sudo systemctl restart apache2
 
-echo "WordPress installed successfully with directories created, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
+echo "WordPress installed successfully with derived variables, directories created, Apache virtual host, Certbot-generated SSL, and HTTP to HTTPS redirection!"
