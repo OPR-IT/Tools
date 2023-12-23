@@ -70,7 +70,6 @@ tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 	SSLEngine on
 	SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
 	SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
-	Include /etc/letsencrypt/options-ssl-apache.conf
 </VirtualHost>
 EOF
 
