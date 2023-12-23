@@ -45,16 +45,18 @@ certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
 
 # Create Apache Virtual Host Configuration File
 tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
-<VirtualHost *:80>
-	ServerAdmin webmaster@${DOMAIN_NAME}
-	ServerName ${DOMAIN_NAME}
-	DocumentRoot ${WP_DIR}
-	ErrorLog \${APACHE_LOG_DIR}/error.log
-	CustomLog \${APACHE_LOG_DIR}/access.log combined
-	RewriteEngine On
-	RewriteCond %{HTTPS} off
-	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-</VirtualHost>
+<IfModule mod_rewrite.c>
+	<VirtualHost *:80>
+		ServerAdmin webmaster@${DOMAIN_NAME}
+		ServerName ${DOMAIN_NAME}
+		DocumentRoot ${WP_DIR}
+		ErrorLog \${APACHE_LOG_DIR}/error.log
+		CustomLog \${APACHE_LOG_DIR}/access.log combined
+		RewriteEngine On
+		RewriteCond %{HTTPS} off
+		RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+	</VirtualHost>
+</IfModule>
 
 <VirtualHost *:443>
 	ServerAdmin webmaster@${DOMAIN_NAME}
