@@ -46,30 +46,30 @@ certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
 # Create Apache Virtual Host Configuration File
 tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 <VirtualHost *:80>
-	ServerAdmin webmaster@${DOMAIN_NAME}
-	ServerName ${DOMAIN_NAME}
-	DocumentRoot ${WP_DIR}
-	ErrorLog \${APACHE_LOG_DIR}/error.log
-	CustomLog \${APACHE_LOG_DIR}/access.log combined
+	ServerAdmin webmaster@$'DOMAIN_NAME'
+	ServerName $'DOMAIN_NAME'
+	DocumentRoot $'WP_DIR'
+	ErrorLog $'APACHE_LOG_DIR'/error.log
+	CustomLog $'APACHE_LOG_DIR'/access.log combined
 	RewriteEngine On
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </VirtualHost>
 
 <VirtualHost *:443>
-	ServerAdmin webmaster@${DOMAIN_NAME}
-	ServerName ${DOMAIN_NAME}
-	DocumentRoot ${WP_DIR}
-	ErrorLog \${APACHE_LOG_DIR}/error.log
-	CustomLog \${APACHE_LOG_DIR}/access.log combined
-	<Directory ${WP_DIR}>
+	ServerAdmin webmaster@$'DOMAIN_NAME'
+	ServerName $'DOMAIN_NAME'
+	DocumentRoot $'WP_DIR'
+	ErrorLog $'APACHE_LOG_DIR'/error.log
+	CustomLog $'APACHE_LOG_DIR'/access.log combined
+	<Directory $'WP_DIR'>
 		Options FollowSymLinks
 		AllowOverride All
 		Require all granted
 	</Directory>
 	SSLEngine on
-	SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
-	SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
+	SSLCertificateFile /etc/letsencrypt/live/$'DOMAIN_NAME'/fullchain.pem
+	SSLCertificateKeyFile /etc/letsencrypt/live/$'DOMAIN_NAME'/privkey.pem
 	Include /etc/letsencrypt/options-ssl-apache.conf
 </VirtualHost>
 EOF
