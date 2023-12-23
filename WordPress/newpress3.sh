@@ -3,7 +3,7 @@
 # Derive variables from a domain
 read -p "Enter your new domain (e.g., yourdomain.com): " DOMAIN_NAME
 WP_URL="https://${DOMAIN_NAME}"
-SUB_DIR="${DOMAIN_NAME//./_}"
+SUB_DIR="${DOMAIN_NAME//./}"
 WP_DIR="/var/www/${DOMAIN_NAME}"
 DB_NAME="${SUB_DIR}_db"
 DB_USER="${SUB_DIR}_user"
