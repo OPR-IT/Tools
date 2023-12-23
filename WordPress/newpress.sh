@@ -37,8 +37,8 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
 # Update site URL in WordPress database
-mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' WHERE option_name='siteurl';"
-mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' WHERE option_name='home';"
+# mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' # WHERE option_name='siteurl';"
+# mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' # WHERE option_name='home';"
 
 # Generate CSR with Certbot
 certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
@@ -46,9 +46,9 @@ certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
 # Create Apache Virtual Host Configuration File
 tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 <VirtualHost *:80>
-	ServerAdmin webmaster@$DOMAIN_NAME
-	ServerName $DOMAIN_NAME
-	DocumentRoot $WP_DIR
+	ServerAdmin webmaster@${DOMAIN_NAME}
+	ServerName ${DOMAIN_NAME}
+	DocumentRoot ${WP_DIR}
 	ErrorLog \${APACHE_LOG_DIR}/error.log
 	CustomLog \${APACHE_LOG_DIR}/access.log combined
 	RewriteEngine On
@@ -57,19 +57,19 @@ tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 </VirtualHost>
 
 <VirtualHost *:443>
-	ServerAdmin webmaster@$DOMAIN_NAME
-	ServerName $DOMAIN_NAME
-	DocumentRoot $WP_DIR
+	ServerAdmin webmaster@${DOMAIN_NAME}
+	ServerName ${DOMAIN_NAME}
+	DocumentRoot ${WP_DIR}
 	ErrorLog \${APACHE_LOG_DIR}/error.log
 	CustomLog \${APACHE_LOG_DIR}/access.log combined
-	<Directory $WP_DIR>
+	<Directory ${WP_DIR}>
 		Options FollowSymLinks
 		AllowOverride All
 		Require all granted
 	</Directory>
 	SSLEngine on
-	SSLCertificateFile /etc/letsencrypt/live/$DOMAIN_NAME/fullchain.pem
-	SSLCertificateKeyFile /etc/letsencrypt/live/$DOMAIN_NAME/privkey.pem
+	SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
+	SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
 	Include /etc/letsencrypt/options-ssl-apache.conf
 </VirtualHost>
 EOF
@@ -80,8 +80,8 @@ sudo a2enmod ssl
 sudo systemctl restart apache2
 
 # Print installation summary
-echo -e "\n  $WP_URL\n"
-echo "  Web Directory: $WP_DIR"
-echo "  Database Name: $DB_NAME"
-echo "  Database User: $DB_USER"
-echo -e "  Database Pass: $DB_PASSWORD\n"
+echo -e "\n  ${WP_URL}\n"
+echo "  Web Directory: ${WP_DIR}"
+echo "  Database Name: ${DB_NAME}"
+echo "  Database User: ${DB_USER}"
+echo -e "  Database Pass: ${DB_PASSWORD}\n"
