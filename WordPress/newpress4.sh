@@ -49,8 +49,8 @@ tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 	ServerAdmin webmaster@${DOMAIN_NAME}
 	ServerName ${DOMAIN_NAME}
 	DocumentRoot ${WP_DIR}
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	ErrorLog \${APACHE_LOG_DIR}/error.log
+	CustomLog \${APACHE_LOG_DIR}/access.log combined
 	RewriteEngine On
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -60,8 +60,8 @@ tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 	ServerAdmin webmaster@${DOMAIN_NAME}
 	ServerName ${DOMAIN_NAME}
 	DocumentRoot ${WP_DIR}
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	ErrorLog \${APACHE_LOG_DIR}/error.log
+	CustomLog \${APACHE_LOG_DIR}/access.log combined
 	<Directory ${WP_DIR}>
 		Options FollowSymLinks
 		AllowOverride All
