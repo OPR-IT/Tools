@@ -4,7 +4,7 @@
 read -p "Enter your new domain (e.g., yourdomain.com): " DOMAIN_NAME
 WP_URL="https://${DOMAIN_NAME}"
 SUB_DIR="${DOMAIN_NAME//./_}"
-WP_DIR="/var/www/$SUB_DIR"
+WP_DIR="/var/www/${DOMAIN_NAME}"
 DB_NAME="${SUB_DIR}_db"
 DB_USER="${SUB_DIR}_user"
 DB_PASSWORD="${SUB_DIR}_pass"
