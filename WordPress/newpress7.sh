@@ -57,23 +57,24 @@ tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
 		RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 	</VirtualHost>
 </IfModule>
-
-<VirtualHost *:443>
-	ServerAdmin webmaster@${DOMAIN_NAME}
-	ServerName ${DOMAIN_NAME}
-	DocumentRoot ${WP_DIR}
-	ErrorLog \${APACHE_LOG_DIR}/error.log
-	CustomLog \${APACHE_LOG_DIR}/access.log combined
-	<Directory ${WP_DIR}>
-		Options FollowSymLinks
-		AllowOverride All
-		Require all granted
-	</Directory>
-	SSLEngine on
-	SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
-	SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
-</VirtualHost>
 EOF
+
+# <VirtualHost *:443>
+# 	ServerAdmin webmaster@${DOMAIN_NAME}
+# 	ServerName ${DOMAIN_NAME}
+# 	DocumentRoot ${WP_DIR}
+# 	ErrorLog \${APACHE_LOG_DIR}/error.log
+# 	CustomLog \${APACHE_LOG_DIR}/access.log combined
+# 	<Directory ${WP_DIR}>
+# 		Options FollowSymLinks
+# 		AllowOverride All
+# 		Require all granted
+# 	</Directory>
+# 	SSLEngine on
+# 	SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
+# 	SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
+# </VirtualHost>
+# EOF
 
 # Enable Apache Virtual Host and SSL
 sudo a2ensite $SUB_DIR.conf
