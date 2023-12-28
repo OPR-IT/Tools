@@ -25,10 +25,10 @@ mv wordpress/* ./
 rm -r wordpress
 
 # Configure
-cp $WP_DIR/wp-config-sample.php $WP_DIR/wp-config.php
-sed -i "s/database_name_here/$DB_NAME/" $WP_DIR/wp-config.php
-sed -i "s/username_here/$DB_USER/" $WP_DIR/wp-config.php
-sed -i "s/password_here/$DB_PASSWORD/" $WP_DIR/wp-config.php
+cp "${WP_DIR}/wp-config-sample.php" "${WP_DIR}/wp-config.php"
+sed -i "s/database_name_here/${DB_NAME}/" "${WP_DIR}/wp-config.php"
+sed -i "s/username_here/${DB_USER}/" "${WP_DIR}/wp-config.php"
+sed -i "s/password_here/${DB_PASSWORD}/" "${WP_DIR}/wp-config.php"
 
 # Make Database
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
@@ -37,14 +37,14 @@ mysql -u root -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
 # Update Database
-# mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' # WHERE option_name='siteurl';"
-# mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' # WHERE option_name='home';"
+mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' # WHERE option_name='siteurl';"
+mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME; UPDATE wp_options SET option_value='$WP_URL' # WHERE option_name='home';"
 
 # Make CSR to Let's Encrypt
-certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
+certbot certonly --webroot -d $DOMAIN_NAME -w "${WP_DIR}"
 
 # Make Apache Config
-tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
+tee "/etc/apache2/sites-available/${SUB_DIR}.conf" > /dev/null << EOF
 <VirtualHost *:80>
 
 	ServerName ${DOMAIN_NAME}
