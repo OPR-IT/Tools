@@ -52,8 +52,11 @@ tee "/etc/apache2/sites-available/${SUB_DIR}.conf" > /dev/null << EOF
 
 </VirtualHost>
 
+
 <IfModule mod_ssl.c>
+
 	<VirtualHost *:443>
+
 		ServerAdmin webmaster@${DOMAIN_NAME}
 		ServerName ${DOMAIN_NAME}
 		DocumentRoot ${WP_DIR}
@@ -62,9 +65,11 @@ tee "/etc/apache2/sites-available/${SUB_DIR}.conf" > /dev/null << EOF
 		CustomLog \${APACHE_LOG_DIR}/access.log combined
 	
 	<Directory ${WP_DIR}>
+
 		Options FollowSymLinks
 		AllowOverride All
 		Require all granted
+
 	</Directory>
 		
 		SSLEngine on
@@ -72,6 +77,7 @@ tee "/etc/apache2/sites-available/${SUB_DIR}.conf" > /dev/null << EOF
 		SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
 
 	</VirtualHost>
+
 </IfModule>
 EOF
 
