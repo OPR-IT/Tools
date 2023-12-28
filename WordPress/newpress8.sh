@@ -45,41 +45,43 @@ certbot certonly --webroot -w $WP_DIR -d $DOMAIN_NAME
 
 # Create Apache Virtual Host Configuration File
 tee /etc/apache2/sites-available/$SUB_DIR.conf > /dev/null << EOF
-<IfModule mod_rewrite.c>
-	<VirtualHost *:80>
-		ServerAdmin webmaster@${DOMAIN_NAME}
-		ServerName ${DOMAIN_NAME}
-		DocumentRoot ${WP_DIR}
-		ErrorLog \${APACHE_LOG_DIR}/error.log
-		CustomLog \${APACHE_LOG_DIR}/access.log combined
-		RewriteEngine On
-		RewriteCond %{HTTPS} off
-		RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-	</VirtualHost>
+<VirtualHost *:80>
+
+	ServerName ${DOMAIN_NAME}
+	Redirect / "https://${DOMAIN_NAME}"
+
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+	<VirtualHost *:443>
+ 		ServerAdmin webmaster@${DOMAIN_NAME}
+   		ServerName ${DOMAIN_NAME}
+	 	DocumentRoot ${WP_DIR}
+   
+   		ErrorLog \${APACHE_LOG_DIR}/error.log
+	 	CustomLog \${APACHE_LOG_DIR}/access.log combined
+ 	
+  	<Directory ${WP_DIR}>
+ 		Options FollowSymLinks
+ 		AllowOverride All
+ 		Require all granted
+ 	</Directory>
+ 		
+   		SSLEngine on
+  		SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
+  		SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
+
+ 	</VirtualHost>
 </IfModule>
 EOF
-
-# <VirtualHost *:443>
-# 	ServerAdmin webmaster@${DOMAIN_NAME}
-# 	ServerName ${DOMAIN_NAME}
-# 	DocumentRoot ${WP_DIR}
-# 	ErrorLog \${APACHE_LOG_DIR}/error.log
-# 	CustomLog \${APACHE_LOG_DIR}/access.log combined
-# 	<Directory ${WP_DIR}>
-# 		Options FollowSymLinks
-# 		AllowOverride All
-# 		Require all granted
-# 	</Directory>
-# 	SSLEngine on
-# 	SSLCertificateFile /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem
-# 	SSLCertificateKeyFile /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem
-# </VirtualHost>
-# EOF
 
 # Enable Apache Virtual Host and SSL
 sudo a2ensite $SUB_DIR.conf
 sudo a2enmod ssl
-sudo systemctl restart apache2
+sudo systemctl reload apache2
+
+# Make CSR to Let's Encrypt
+certbot certonly --webroot -d ${DOMAIN_NAME} -w ${WP_DIR}
 
 # Print installation summary
 echo -e "\n  ${WP_URL}\n"
@@ -87,3 +89,4 @@ echo "  Web Directory: ${WP_DIR}"
 echo "  Database Name: ${DB_NAME}"
 echo "  Database User: ${DB_USER}"
 echo -e "  Database Pass: ${DB_PASSWORD}\n"
+
